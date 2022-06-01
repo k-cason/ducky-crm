@@ -1,0 +1,41 @@
+name: Coverity POC with GitHub-hosted runner
+on:
+  push:
+    branches: [ master, main ]
+
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: synopsys-sig-community/synopsys-github-templates/coverity@v0.0.1-shanko1
+        with:
+          # Required to identify new defects and commit full results
+          coverity-url: ${{ secrets.COVERITY_URL }}
+          coverity-user: ${{ secrets.COVERITY_USER }}
+          coverity-passphrase: ${{ secrets.COVERITY_PASSPHRASE }}
+
+          # Optional, for auto-download Coverity bits
+          coverity-download-url: synopsys-sig-community/synopsys-github-bits
+          coverity-download-creds: ${{ secrets.COVERITY_DOWNLOAD_CREDS }}
+          coverity-download-version: 2022.3.1
+          coverity-license-url: https://thirteen.community/private/license.dat
+          coverity-license-creds: ${{ secrets.COVERITY_LICENSE_CREDS }}
+
+          # Required to identify new defects
+          coverity-project-name: ${{ github.event.repository.name }}
+          # Optional, if left out use cov-capture
+          build-command: mvn package
+          # Optional, but note --webapp-securiy is not the default
+          coverity-checker-options: --webapp-security
+          # Optional
+          create-stream-and-project: true
+          # Optional
+          #security-gate-view-name: "High and Medium Severity"
+          # Required for GitHub
+          github-token: ${{ secrets.GITHUB_TOKEN }}
